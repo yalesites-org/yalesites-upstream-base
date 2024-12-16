@@ -117,7 +117,9 @@ class PostMetaBlock extends BlockBase implements ContainerFactoryPluginInterface
       $publishDate = strtotime($node->field_publish_date->first()->getValue()['value']);
       $dateFormatted = $this->dateFormatter->format($publishDate, '', 'c');
       $post_authors = $this->getPostAuthorLinks($node->field_authors);
-      array_push($post_authors, ['title' => $author, 'url' => NULL, 'isLink' => FALSE]);
+      if ($author) {
+        array_push($post_authors, ['title' => $author, 'url' => NULL, 'isLink' => FALSE]);
+      }
     }
 
     return [
