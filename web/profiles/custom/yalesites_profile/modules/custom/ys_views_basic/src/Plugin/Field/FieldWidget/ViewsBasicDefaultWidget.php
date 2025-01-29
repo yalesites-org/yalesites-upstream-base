@@ -12,6 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\ys_views_basic\ViewsBasicManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Plugin implementation of the 'views_basic_default' widget.
@@ -34,6 +35,13 @@ class ViewsBasicDefaultWidget extends WidgetBase implements ContainerFactoryPlug
   protected $viewsBasicManager;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * Constructs a ViewsBasicDefaultWidget object.
    *
    * @param string $plugin_id
@@ -48,6 +56,8 @@ class ViewsBasicDefaultWidget extends WidgetBase implements ContainerFactoryPlug
    *   Any third party settings.
    * @param \Drupal\ys_views_basic\ViewsBasicManager $views_basic_manager
    *   The ViewsBasic management service.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager service.
    */
   public function __construct(
     $plugin_id,
@@ -56,6 +66,7 @@ class ViewsBasicDefaultWidget extends WidgetBase implements ContainerFactoryPlug
     array $settings,
     array $third_party_settings,
     ViewsBasicManager $views_basic_manager,
+    EntityTypeManagerInterface $entity_type_manager,
   ) {
     parent::__construct(
       $plugin_id,
@@ -65,6 +76,7 @@ class ViewsBasicDefaultWidget extends WidgetBase implements ContainerFactoryPlug
       $third_party_settings
     );
     $this->viewsBasicManager = $views_basic_manager;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -82,7 +94,8 @@ class ViewsBasicDefaultWidget extends WidgetBase implements ContainerFactoryPlug
       $configuration['field_definition'],
       $configuration['settings'],
       $configuration['third_party_settings'],
-      $container->get('ys_views_basic.views_basic_manager')
+      $container->get('ys_views_basic.views_basic_manager'),
+      $container->get('entity_type.manager')
     );
   }
 
@@ -261,12 +274,15 @@ class ViewsBasicDefaultWidget extends WidgetBase implements ContainerFactoryPlug
       ],
     ];
 
+    $custom_vocab_label = $this->entityTypeManager->getStorage('taxonomy_vocabulary')->load('custom_vocab')->label();
     $form['group_user_selection']['entity_and_view_mode']['exposed_filter_options'] = [
       '#type' => 'checkboxes',
       '#options' => [
         'show_search_filter' => $this->t('Show Search'),
         'show_year_filter' => $this->t('Show Year'),
         'show_category_filter' => $this->t('Show Category'),
+        'show_custom_vocab_filter' => $this->t('Show @vocab', ['@vocab' => $custom_vocab_label]),
+        'show_audience_filter' => $this->t('Show Audience'),
       ],
       '#title' => $this->t('Exposed Filter Options'),
       '#tree' => TRUE,
@@ -301,6 +317,17 @@ class ViewsBasicDefaultWidget extends WidgetBase implements ContainerFactoryPlug
       '#suffix' => '</div>',
       '#states' => [
         'visible' => [$formSelectors['show_category_filter_selector'] => ['checked' => TRUE]],
+        'invisible' => $calendarViewInvisibleState,
+      ],
+    ];
+
+    $form['group_user_selection']['entity_and_view_mode']['audience_filter_label'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Audience Filter Label'),
+      '#description' => $this->t("Enter a custom label for the <strong>Audience Filter</strong>. This label will be displayed to users as the filter's name. If left blank, the default label <strong>Audience</strong> will be used."),
+      '#default_value' => ($items[$delta]->params) ? $this->viewsBasicManager->getDefaultParamValue('audience_filter_label', $items[$delta]->params) : NULL,
+      '#states' => [
+        'visible' => [$formSelectors['show_audience_filter_selector'] => ['checked' => TRUE]],
         'invisible' => $calendarViewInvisibleState,
       ],
     ];
@@ -470,6 +497,7 @@ class ViewsBasicDefaultWidget extends WidgetBase implements ContainerFactoryPlug
         "exposed_filter_options" => $form['group_user_selection']['entity_and_view_mode']['exposed_filter_options']['#value'],
         "category_filter_label" => $form['group_user_selection']['entity_and_view_mode']['category_filter_label']['#value'],
         "category_included_terms" => $form['group_user_selection']['entity_and_view_mode']['category_included_terms']['#value'],
+        "audience_filter_label" => $form['group_user_selection']['entity_and_view_mode']['audience_filter_label']['#value'],
         "operator" => $form['group_user_selection']['filter_and_sort']['term_operator']['#value'],
         "sort_by" => $form_state->getValue($formSelectors['sort_by_array']),
         "display" => $form_state->getValue($formSelectors['display_array']),
