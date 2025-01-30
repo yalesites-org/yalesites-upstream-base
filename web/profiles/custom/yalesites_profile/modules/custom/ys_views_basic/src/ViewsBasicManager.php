@@ -420,8 +420,8 @@ class ViewsBasicManager extends ControllerBase implements ContainerInjectionInte
       'show_thumbnail' => (int) $no_field_display_options_saved || !empty($paramsDecoded['field_options']['show_thumbnail']),
     ];
 
-    $pinned_to_top = (bool) $paramsDecoded['pinned_to_top'] ?? FALSE;
-    $pin_label = $paramsDecoded['pin_label'] ?? self::DEFAULT_PIN_LABEL;
+    $pinned_to_top = isset($paramsDecoded['pinned_to_top']) ? (bool) $paramsDecoded['pinned_to_top'] : FALSE;
+    $pin_label = isset($paramsDecoded['pin_label']) ? (bool) $paramsDecoded['pin_label'] : self::DEFAULT_PIN_LABEL;
 
     if (!$pinned_to_top) {
       $pin_label = NULL;
