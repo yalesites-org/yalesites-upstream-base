@@ -61,9 +61,9 @@ content_spotlight:
     default: default
   field_style_alignment:
     values:
-      top: 'Top'
-      middle: 'Middle'
-      bottom: 'Bottom'
+      top: Top
+      middle: Middle
+      bottom: Bottom
     default: top
 quick_links:
   field_style_variation:
@@ -174,9 +174,9 @@ content_spotlight_portrait:
     default: default
   field_style_alignment:
     values:
-      top: 'Top'
-      middle: 'Middle'
-      bottom: 'Bottom'
+      top: Top
+      middle: Middle
+      bottom: Bottom
     default: middle
 text:
   field_style_variation:
@@ -274,3 +274,25 @@ inline_message:
       four: Four
       five: Five
     default: one
+accordion:
+  field_style_color:
+    values:
+      default: 'Default - No Color'
+      one: One
+      two: Two
+      three: Three
+      four: Four
+      five: Five
+    default: default
+video:
+  field_style_alignment:
+    values:
+      left: Left
+      center: Center
+    default: left
+image_banner:
+  field_style_variation:
+    values:
+      tall: Tall
+      short: Short
+    default: tall
